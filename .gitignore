@@ -1,0 +1,57 @@
+# ==========================================
+# C++ / CMake Build & Output Directories
+# ==========================================
+build/
+build-*/
+bin/
+lib/
+out/
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# CMake Cache & Generated Files
+CMakeCache.txt
+CMakeFiles/
+CMakeUserPresets.json
+cmake_install.cmake
+Makefile
+*.cmake.user
+
+# ==========================================
+# Qt Creator IDE Specific Files
+# ==========================================
+*.user
+*.user.*
+.qtcreator/
+*.autosave
+
+# Qt Generated MOC, UI, and Resource outputs
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmlc
+*.jsc
+
+# ==========================================
+# Operating System & Editor Files
+# ==========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+
+# VS Code / JetBrains (CLION)
+.vscode/
+.idea/
