@@ -1,21 +1,58 @@
+// ResourceParameters.qml
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import faraz
 
 Rectangle {
     id: root
 
-    // same palette as StationTabs
     readonly property color accent: "gray"
     readonly property color surface: "black"
     readonly property color surfaceHover: "#2e323c"
     readonly property color outline: "#555555"
     readonly property color textIdle: "#9a9a9a"
 
+    readonly property var unitFactors: [1, 1e3, 1e6, 1e9]
+    readonly property var spans: [50e3, 100e3, 200e3, 500e3, 1e6, 5e6, 10e6]
+    readonly property var spanLabels: ["50 kHz", "100 kHz", "200 kHz", "500 kHz", "1 MHz", "5 MHz", "10 MHz"]
+
+    property SpectrumTelemetry telemetry: null
+
     color: "#202020"
     radius: 8
     border.width: 1
     border.color: "#333333"
+
+    // UI -> telemetry
+    function applyFrequency() {
+        if (!telemetry) return
+        const value = parseFloat(freqField.text)
+        if (isNaN(value)) return
+        telemetry.centerFrequency = value * unitFactors[unitBox.currentIndex]
+    }
+
+    // telemetry -> UI (initial state & telemetry changes)
+    function loadFromTelemetry() {
+        if (!telemetry) return
+
+        let idx = 2 // pick the largest unit that keeps value >= 1
+        for (let i = unitFactors.length - 1; i >= 0; --i) {
+            if (telemetry.centerFrequency >= unitFactors[i]) {
+                idx = i
+                break
+            }
+        }
+        unitBox.currentIndex = idx
+        freqField.text = String(telemetry.centerFrequency / unitFactors[idx])
+
+        const s = spans.indexOf(telemetry.span)
+        freqSlider.value = s >= 0 ? s : 4
+        dfSwitch.checked = telemetry.dfMode
+    }
+
+    Component.onCompleted: loadFromTelemetry()
+    onTelemetryChanged: loadFromTelemetry()
 
     RowLayout {
         anchors.fill: parent
@@ -47,6 +84,9 @@ Rectangle {
                     placeholderTextColor: "#666666"
                     selectByMouse: true
                     verticalAlignment: TextInput.AlignVCenter
+                    validator: DoubleValidator { bottom: 0 }
+
+                    onEditingFinished: root.applyFrequency()
 
                     background: Rectangle {
                         radius: 8
@@ -66,6 +106,8 @@ Rectangle {
                     height: 32
                     model: ["Hz", "kHz", "MHz", "GHz"]
                     font.pixelSize: 14
+
+                    onActivated: root.applyFrequency()
 
                     contentItem: Text {
                         leftPadding: 10
@@ -138,8 +180,15 @@ Rectangle {
                 }
             }
 
+            Label {
+                text: "Span:"
+                font.pixelSize: 14
+                font.bold: true
+                color: "white"
+            }
+
             Slider {
-                id: frequencySlider
+                id: freqSlider
 
                 Layout.preferredWidth: 220
                 Layout.preferredHeight: 55
@@ -149,26 +198,26 @@ Rectangle {
                 stepSize: 1
                 snapMode: Slider.SnapAlways
 
-                property var frequencies: [
-                    "50 kHz", "100 kHz", "200 kHz",
-                    "500 kHz", "1 MHz", "5 MHz", "10 MHz"
-                ]
+                onMoved: {
+                    if (root.telemetry)
+                        root.telemetry.span = root.spans[Math.round(value)]
+                }
 
                 background: Rectangle {
-                    x: frequencySlider.leftPadding
-                    y: frequencySlider.topPadding +
-                       frequencySlider.availableHeight / 2 - height / 2
+                    x: freqSlider.leftPadding
+                    y: freqSlider.topPadding +
+                       freqSlider.availableHeight / 2 - height / 2
 
-                    width: frequencySlider.availableWidth
+                    width: freqSlider.availableWidth
                     height: 4
                     radius: 2
                     color: "#404040"
 
                     // filled part up to the handle
                     Rectangle {
-                        width: frequencySlider.visualPosition *
-                               (parent.width - frequencySlider.handle.width) +
-                               frequencySlider.handle.width / 2
+                        width: freqSlider.visualPosition *
+                               (parent.width - freqSlider.handle.width) +
+                               freqSlider.handle.width / 2
                         height: parent.height
                         radius: 2
                         color: root.accent
@@ -183,8 +232,8 @@ Rectangle {
                             height: 10
                             radius: 1
                             color: "#555555"
-                            x: frequencySlider.handle.width / 2 +
-                               index / 6 * (parent.width - frequencySlider.handle.width) - width / 2
+                            x: freqSlider.handle.width / 2 +
+                               index / 6 * (parent.width - freqSlider.handle.width) - width / 2
                             y: (parent.height - height) / 2
                             z: -1
                         }
@@ -192,52 +241,63 @@ Rectangle {
                 }
 
                 handle: Rectangle {
-                    x: frequencySlider.leftPadding +
-                       frequencySlider.visualPosition *
-                       (frequencySlider.availableWidth - width)
-                    y: frequencySlider.topPadding +
-                       frequencySlider.availableHeight / 2 - height / 2
+                    x: freqSlider.leftPadding +
+                       freqSlider.visualPosition *
+                       (freqSlider.availableWidth - width)
+                    y: freqSlider.topPadding +
+                       freqSlider.availableHeight / 2 - height / 2
 
                     width: 12
                     height: 22
                     radius: 6
-                    color: frequencySlider.pressed ? "#dddddd" : "white"
-                    scale: frequencySlider.hovered || frequencySlider.pressed ? 1.1 : 1.0
+                    color: freqSlider.pressed ? "#dddddd" : "white"
+                    scale: freqSlider.hovered || freqSlider.pressed ? 1.1 : 1.0
                     Behavior on scale { NumberAnimation { duration: 120 } }
                 }
 
                 Text {
-                    text: frequencySlider.frequencies[Math.round(frequencySlider.value)]
+                    text: root.spanLabels[Math.round(freqSlider.value)]
                     color: "white"
                     font.pixelSize: 12
                     font.bold: true
 
-                    y: frequencySlider.topPadding +
-                       frequencySlider.availableHeight / 2 + 17
+                    y: freqSlider.topPadding +
+                       freqSlider.availableHeight / 2 + 17
 
-                    x: frequencySlider.leftPadding +
-                       frequencySlider.visualPosition *
-                       (frequencySlider.availableWidth - frequencySlider.handle.width) +
-                       frequencySlider.handle.width / 2 -
-                       width / 2
+                    x: Math.max(
+                        freqSlider.leftPadding,
+                        Math.min(
+                            freqSlider.leftPadding + freqSlider.availableWidth - width,
+                            freqSlider.leftPadding +
+                            freqSlider.visualPosition *
+                            (freqSlider.availableWidth - freqSlider.handle.width) +
+                            freqSlider.handle.width / 2 -
+                            width / 2
+                        )
+                    )
                 }
             }
 
             Switch {
-                id: mySwitch
+                id: dfSwitch
                 text: "DF Mode"
                 checked: false
+
+                onToggled: {
+                    if (root.telemetry)
+                        root.telemetry.dfMode = checked
+                }
 
                 indicator: Rectangle {
                     implicitWidth: 42
                     implicitHeight: 22
-                    x: mySwitch.leftPadding
+                    x: dfSwitch.leftPadding
                     y: parent.height / 2 - height / 2
                     radius: height / 2
-                    color: mySwitch.checked ? root.accent : root.surface
+                    color: dfSwitch.checked ? root.accent : root.surface
                     border.width: 1
-                    border.color: mySwitch.checked ? root.accent
-                                : mySwitch.hovered ? "#888888"
+                    border.color: dfSwitch.checked ? root.accent
+                                : dfSwitch.hovered ? "#888888"
                                 : root.outline
                     Behavior on color { ColorAnimation { duration: 150 } }
                     Behavior on border.color { ColorAnimation { duration: 150 } }
@@ -248,23 +308,19 @@ Rectangle {
                         radius: 8
                         color: "white"
                         y: (parent.height - height) / 2
-                        x: 3 + mySwitch.visualPosition * (parent.width - width - 6)
+                        x: 3 + dfSwitch.visualPosition * (parent.width - width - 6)
                         Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                     }
                 }
 
                 contentItem: Text {
-                    text: mySwitch.text
+                    text: dfSwitch.text
                     font.pixelSize: 14
-                    font.bold: mySwitch.checked
-                    color: mySwitch.checked ? "white" : root.textIdle
+                    font.bold: dfSwitch.checked
+                    color: dfSwitch.checked ? "white" : root.textIdle
                     verticalAlignment: Text.AlignVCenter
-                    leftPadding: mySwitch.indicator.width + mySwitch.spacing
+                    leftPadding: dfSwitch.indicator.width + dfSwitch.spacing
                     Behavior on color { ColorAnimation { duration: 150 } }
-                }
-
-                onToggled: {
-                    console.log("Toggle:", checked)
                 }
             }
 

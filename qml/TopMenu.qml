@@ -1,3 +1,4 @@
+//TopMenu.qml
 import QtQuick
 import QtQuick.Layouts
 
@@ -21,7 +22,9 @@ Item {
     RowLayout {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
+        anchors.right: parent.right
         anchors.leftMargin: 8
+        anchors.rightMargin: 8
         spacing: 4
 
         Repeater {
@@ -124,6 +127,21 @@ Item {
                     root.stationAdded(root.currentIndex)
                 }
             }
+        }
+
+        Item{
+            Layout.fillWidth: true
+        }
+
+        //Notifications
+        MenuButton {
+            iconName: "warning"
+            iconColor: "#d05016"
+            onClicked: console.log("clicked search")
+        }
+        Text{
+            text: "Threat Detected"
+            color: "#d05016"
         }
     }
 
