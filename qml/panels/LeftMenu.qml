@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import faraz
 
 Rectangle {
     id: leftMenuContainer
