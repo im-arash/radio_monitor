@@ -2,11 +2,13 @@ import QtQuick
 import QtQuick.Layouts
 import QtLocation
 import QtPositioning
+import faraz
 
 Item {
     id: mapContainer
     property int cornerRadius: 10
-    property var df: telemetry
+    property var stationState: null
+    readonly property var df: stationState
 
     Layout.preferredWidth: 800
     Layout.preferredHeight: 400
@@ -22,55 +24,61 @@ Item {
     }
 
     Map {
-            id: gisMap
-            anchors.fill: parent
-            plugin: mapPlugin
-            activeMapType: supportedMapTypes[supportedMapTypes.length - 1]
-            center: df.station.isValid ? df.station : QtPositioning.coordinate(0, 0)
-            zoomLevel: 16
+        id: gisMap
+        anchors.fill: parent
+        plugin: mapPlugin
+        activeMapType: supportedMapTypes.length > 0
+                       ? supportedMapTypes[supportedMapTypes.length - 1]
+                       : undefined
+        center: (df && df.station && df.station.isValid)
+                ? df.station
+                : QtPositioning.coordinate(0, 0)
+        zoomLevel: 16
 
-            MapCircle {
-                visible: df.station.isValid
-                center: df.station
-                radius: 45
-                color: "transparent"
-                border.color: "#00b0ff"
-                border.width: 2
-            }
+        MapCircle {
+            visible: !!(df && df.station && df.station.isValid)
+            center: (df && df.station) ? df.station : QtPositioning.coordinate(0, 0)
+            radius: 45
+            color: "transparent"
+            border.color: Theme.accentColor
+            border.width: 2
+        }
 
-            MapPolyline {
-                visible: df.active && df.hasBearing && df.station.isValid && df.lineEnd.isValid
-                line.width: 2
-                line.color: "#00b0ff"
-                path: [df.station, df.lineEnd]
-            }
+        MapPolyline {
+            visible: !!(df && df.active && df.hasBearing
+                        && df.station && df.station.isValid
+                        && df.lineEnd && df.lineEnd.isValid)
+            line.width: 2
+            line.color: Theme.accentColor
+            path: (df && df.station && df.lineEnd) ? [df.station, df.lineEnd] : []
+        }
 
-            MapQuickItem {
-                visible: df.station.isValid
-                coordinate: df.station
-                anchorPoint.x: 7
-                anchorPoint.y: 7
-                sourceItem: Item {
-                    width: 14
-                    height: 14
-                    Rectangle {
-                        anchors.fill: parent
-                        rotation: 45
-                        color: "#00b0ff"
-                        border.color: "white"
-                        border.width: 2
-                    }
-                    Text {
-                        x: 18
-                        y: -2
-                        text: "DF 1"
-                        color: "white"
-                        font.pixelSize: 11
-                        style: Text.Outline
-                        styleColor: "black"
-                    }
+        MapQuickItem {
+            visible: !!(df && df.station && df.station.isValid)
+            coordinate: (df && df.station) ? df.station : QtPositioning.coordinate(0, 0)
+            anchorPoint.x: 7
+            anchorPoint.y: 7
+            sourceItem: Item {
+                width: 14
+                height: 14
+                Rectangle {
+                    anchors.fill: parent
+                    rotation: 45
+                    color: Theme.accentColor
+                    border.color: "white"
+                    border.width: 2
+                }
+                Text {
+                    x: 18
+                    y: -2
+                    text: "DF 1"
+                    color: "white"
+                    font.pixelSize: 11
+                    style: Text.Outline
+                    styleColor: "black"
                 }
             }
+        }
 
         DragHandler {
             id: panHandler
@@ -116,8 +124,8 @@ Item {
         onHeightChanged: requestPaint()
 
         Connections {
-            target: window
-            function onSuperDarkChanged() { cornerRadiusOverlay.requestPaint() }
+            target: Theme
+            function onBackgroundColorChanged() { cornerRadiusOverlay.requestPaint() }
         }
 
         onPaint: {
@@ -128,7 +136,7 @@ Item {
             if (r <= 0)
                 return
 
-            ctx.fillStyle = window.superDark.toString()
+            ctx.fillStyle = Theme.backgroundColor.toString()
 
             // Top-left corner
             ctx.beginPath()

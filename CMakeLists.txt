@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Location Positioning ShaderTools GuiPrivate)
+find_package(Qt6 REQUIRED COMPONENTS Quick Location Positioning)
 
 qt_standard_project_setup(REQUIRES 6.10)
 
@@ -18,6 +18,9 @@ endif()
 qt_add_executable(appfaraz
     main.cpp
 )
+
+set_source_files_properties(qml/Theme.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_qml_module(appfaraz
     URI faraz
@@ -32,37 +35,28 @@ qt_add_qml_module(appfaraz
         qml/LeftMenu.qml
         qml/MapContainer.qml
         qml/MenuButton.qml
+        qml/SettingsPopup.qml
+        qml/Theme.qml
+
     SOURCES
         spectrumwaveitem.h
         spectrumwaveitem.cpp
-
-
         waterfallitem.h
         waterfallitem.cpp
         heatmapitem.h
         heatmapitem.cpp
-
+        stationstate.h
+        stationstate.cpp
+        stationmodel.h
+        stationmodel.cpp
+        tcpclient.h
+        tcpclient.cpp
+        packet.h
 
     RESOURCES
         resources/images/farazlogo.png
         resources/icons/MaterialSymbolsSharp.ttf
         resources/icons/MaterialSymbolsSharp.codepoints
-        SOURCES telemetryclient.h telemetryclient.cpp
-        SOURCES
-        SOURCES packet.h
-)
-
-
-qt_add_shaders(appfaraz "shaders"
-    PREFIX "/shaders"
-    BASE resources/shaders
-    FILES
-        resources/shaders/spectrum.vert
-        resources/shaders/spectrum.frag
-        resources/shaders/waterfall.vert
-        resources/shaders/waterfall.frag
-        resources/shaders/heatmap.vert
-        resources/shaders/heatmap.frag
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -77,7 +71,7 @@ set_target_properties(appfaraz PROPERTIES
 )
 
 target_link_libraries(appfaraz
-    PRIVATE Qt6::Quick Qt6::GuiPrivate Qt6::Positioning
+    PRIVATE Qt6::Quick Qt6::Positioning
 )
 
 install(TARGETS appfaraz

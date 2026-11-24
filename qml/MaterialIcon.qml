@@ -1,10 +1,11 @@
 //MaterialIcon.qml
 import QtQuick
+import faraz
 
 Item {
     property string icon
     property int size: 28
-    property color iconColor: "gray"
+    property color iconColor: Theme.iconColor
 
     implicitWidth: size
     implicitHeight: size

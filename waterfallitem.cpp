@@ -106,8 +106,6 @@ void WaterfallItem::paint(QPainter *painter)
     painter->fillRect(targetRect, Qt::black);
 
     if (m_filledRows > 0) {
-        // Rows are written at m_head and m_head decrements, so the newest row is head+1
-        // and older rows follow at increasing indices (wrapping at kTexH).
         const int start = (m_head + 1) % kTexH;
         const int a = std::min(m_filledRows, kTexH - start);   // rows before the wrap
         const int b = m_filledRows - a;                        // rows after the wrap
@@ -131,7 +129,7 @@ void WaterfallItem::paint(QPainter *painter)
     painter->restore();
 }
 
-void WaterfallItem::setSource(TelemetryClient *s)
+void WaterfallItem::setSource(StationState *s)
 {
     if (m_source == s)
         return;
@@ -139,13 +137,17 @@ void WaterfallItem::setSource(TelemetryClient *s)
     QObject::disconnect(m_frameConn);
     QObject::disconnect(m_tuneConn);
     m_source = s;
+
+    clearHistory();
+
     if (m_source) {
-        m_frameConn = connect(m_source, &TelemetryClient::frameReady,
+        m_frameConn = connect(m_source, &StationState::frameReady,
                               this, &WaterfallItem::onFrame);
-        m_tuneConn  = connect(m_source, &TelemetryClient::axisChanged,
+        m_tuneConn  = connect(m_source, &StationState::axisChanged,
                              this, &WaterfallItem::onTuningChanged);
     }
     emit sourceChanged();
+    update();
 }
 
 void WaterfallItem::onTuningChanged()

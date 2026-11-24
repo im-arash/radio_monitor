@@ -1,11 +1,12 @@
 //MenuButton.qml
 import QtQuick
 import QtQuick.Layouts
+import faraz
 
 Rectangle {
     id: menuBtn
     property string iconName
-    property color iconColor: "gray"
+    property color iconColor: Theme.iconColor
     property int iconSize: 24
     signal clicked()
 

@@ -3,10 +3,10 @@ import faraz
 
 Rectangle {
     id: root
-    color: reallyDark
+    color: Theme.panelColor
     radius: 10
     border.width: 1
-    border.color: "#333333"
+    border.color: Theme.borderColor
 
     property alias minDb: wave.minDb
     property alias maxDb: wave.maxDb
@@ -37,11 +37,11 @@ Rectangle {
                 y: plot.height * index / (model_count - 1)
                 readonly property int model_count: Math.round((root.maxDb - root.minDb) / 10) + 1
 
-                Rectangle { width: parent.width; height: 1; color: "#2a2a2a" }
+                Rectangle { width: parent.width; height: 1; color: Theme.gridColor }
                 Text {
                     x: -40; y: -height / 2
                     text: Math.round(root.maxDb - index * 10)
-                    color: "#808080"
+                    color: Theme.textDim
                     font.pixelSize: 10
                 }
             }
@@ -54,7 +54,7 @@ Rectangle {
                 required property int index
                 x: plot.width * index / 10
                 width: 1; height: plot.height
-                color: "#2a2a2a"
+                color: Theme.gridColor
             }
         }
 
@@ -63,6 +63,7 @@ Rectangle {
                     anchors.fill: parent
                     minDb: -140
                     maxDb: -40
+                    traceColor: Theme.accentColor
                 }
 
                 // frequency axis
@@ -75,19 +76,19 @@ Rectangle {
                     Text {
                         width: parent.width / 3
                         text: root.formatHz(parent.c - parent.s / 2)
-                        color: "#808080"; font.pixelSize: 10
+                        color: Theme.textDim; font.pixelSize: 10
                     }
                     Text {
                         width: parent.width / 3
                         horizontalAlignment: Text.AlignHCenter
                         text: root.formatHz(parent.c)
-                        color: "#c0c0c0"; font.pixelSize: 10
+                        color: Theme.textSoft; font.pixelSize: 10
                     }
                     Text {
                         width: parent.width / 3
                         horizontalAlignment: Text.AlignRight
                         text: root.formatHz(parent.c + parent.s / 2)
-                        color: "#808080"; font.pixelSize: 10
+                        color: Theme.textDim; font.pixelSize: 10
                     }
                 }
     }

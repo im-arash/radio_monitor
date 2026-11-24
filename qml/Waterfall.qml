@@ -3,10 +3,10 @@ import faraz
 
 Rectangle {
     id: root
-    color: reallyDark
+    color: Theme.panelColor
     radius: 10
     border.width: 1
-    border.color: "#333333"
+    border.color: Theme.borderColor
 
     property alias source: wf.source
     property alias minDb: wf.minDb

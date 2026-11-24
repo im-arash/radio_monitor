@@ -9,6 +9,8 @@ Rectangle {
     // radius: 10
     color: "transparent"
 
+    signal settingsRequested()
+
     ColumnLayout {
         id: leftMenu
         anchors.fill: parent
@@ -46,7 +48,7 @@ Rectangle {
 
         MenuButton {
             iconName: "settings"
-            onClicked: console.log("clicked apps")
+            onClicked: leftMenuContainer.settingsRequested()
         }
 
         Image {

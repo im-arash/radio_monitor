@@ -9,8 +9,6 @@ SpectrumWaveItem::SpectrumWaveItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
 {
     setAntialiasing(true);
-    // Optional: switch to FramebufferObject if you want FBO backing instead of software/raster backing:
-    // setRenderTarget(QQuickPaintedItem::FramebufferObject);
 }
 
 void SpectrumWaveItem::paint(QPainter *painter)
@@ -58,23 +56,27 @@ void SpectrumWaveItem::paint(QPainter *painter)
     painter->restore();
 }
 
-void SpectrumWaveItem::setSource(TelemetryClient *s)
+void SpectrumWaveItem::setSource(StationState *s)
 {
     if (m_source == s)
         return;
 
     QObject::disconnect(m_conn);
     m_source = s;
+
+    m_data.clear();
+
     if (m_source) {
-        m_conn = connect(m_source, &TelemetryClient::frameReady,
+        m_conn = connect(m_source, &StationState::frameReady,
                          this, &SpectrumWaveItem::onFrame);
     }
     emit sourceChanged();
+    update();
 }
 
 void SpectrumWaveItem::onFrame(const QVector<float> &dbm)
 {
-    m_data = dbm; // QVector is implicitly shared
+    m_data = dbm;
     update();
 }
 

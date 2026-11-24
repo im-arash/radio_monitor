@@ -228,7 +228,7 @@ void HeatmapItem::onBearingMeasured(double bearingDeg, double /*levelDb*/)
     publishGrid();
 }
 
-void HeatmapItem::setLocator(TelemetryClient *l)
+void HeatmapItem::setLocator(StationState *l)
 {
     if (m_locator == l) return;
 
@@ -241,22 +241,23 @@ void HeatmapItem::setLocator(TelemetryClient *l)
         if (m_locator->station().isValid())
             m_station = m_locator->station();
 
-        m_conns << connect(m_locator, &TelemetryClient::bearingMeasured,
+        m_conns << connect(m_locator, &StationState::bearingMeasured,
                            this, &HeatmapItem::onBearingMeasured);
-        m_conns << connect(m_locator, &TelemetryClient::stationChanged, this, [this]() {
+        m_conns << connect(m_locator, &StationState::stationChanged, this, [this]() {
             if (m_locator && m_locator->station().isValid() && m_station != m_locator->station()) {
                 m_station = m_locator->station();
+                reset();
                 emit gridChanged();
             }
         });
-        m_conns << connect(m_locator, &TelemetryClient::axisChanged,
+        m_conns << connect(m_locator, &StationState::axisChanged,
                            this, &HeatmapItem::reset);
-        m_conns << connect(m_locator, &TelemetryClient::dfModeChanged, this, [this]() {
+        m_conns << connect(m_locator, &StationState::dfModeChanged, this, [this]() {
             if (m_locator && !m_locator->dfMode())
                 reset();
         });
 
-        publishGrid();
+        reset();
     } else {
         reset();
     }

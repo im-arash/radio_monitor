@@ -1,23 +1,19 @@
-//TopMenu.qml
+// TopMenu.qml
 import QtQuick
 import QtQuick.Layouts
+import faraz
 
 Item {
     id: root
     Layout.preferredHeight: 40
     Layout.fillWidth: true
 
+    property alias model: repeater.model
     property int currentIndex: 0
-    readonly property color accent: "gray"
+    readonly property color accent: Theme.accentColor
 
-    signal stationAdded(int index)
-
-    ListModel {
-        id: stations
-        ListElement { name: "Station 1" }
-        ListElement { name: "Station 2" }
-        ListElement { name: "Station 3" }
-    }
+    signal stationSelected(int index)
+    signal addStationRequested()
 
     RowLayout {
         anchors.verticalCenter: parent.verticalCenter
@@ -28,7 +24,7 @@ Item {
         spacing: 4
 
         Repeater {
-            model: stations
+            id: repeater
 
             Rectangle {
                 id: tab
@@ -39,8 +35,8 @@ Item {
                 Layout.preferredWidth: label.implicitWidth + 36
                 Layout.preferredHeight: 32
                 radius: 8
-                color: selected ? "black"
-                     : tabMouse.containsMouse ? "#2a2a2a"
+                color: selected ? Theme.inputColor
+                     : tabMouse.containsMouse ? Theme.hoverColor
                      : "transparent"
                 Behavior on color { ColorAnimation { duration: 150 } }
 
@@ -50,13 +46,12 @@ Item {
                     text: tab.name
                     font.pixelSize: 14
                     font.bold: tab.selected
-                    color: tab.selected ? "white"
-                         : tabMouse.containsMouse ? "#dddddd"
-                         : "#9a9a9a"
+                    color: tab.selected ? Theme.textPrimary
+                         : tabMouse.containsMouse ? Theme.textSoft
+                         : Theme.textMuted
                     Behavior on color { ColorAnimation { duration: 150 } }
                 }
 
-                // accent underline that grows in when selected
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
@@ -72,24 +67,22 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.currentIndex = tab.index
+                    onClicked: root.stationSelected(tab.index)
                 }
             }
         }
 
-        // spacer between tabs and the add button
         Item { Layout.preferredWidth: 6 }
 
-        // "New" button
         Rectangle {
             id: addBtn
             Layout.preferredWidth: addRow.implicitWidth + 24
             Layout.preferredHeight: 28
             Layout.alignment: Qt.AlignVCenter
             radius: height / 2
-            color: addMouse.containsMouse ? "black" : "transparent"
+            color: addMouse.containsMouse ? Theme.inputColor : "transparent"
             border.width: 1
-            border.color: addMouse.containsMouse ? root.accent : "#555555"
+            border.color: addMouse.containsMouse ? root.accent : Theme.outlineColor
             Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on border.color { ColorAnimation { duration: 150 } }
 
@@ -103,7 +96,7 @@ Item {
                     text: "+"
                     font.pixelSize: 16
                     font.bold: true
-                    color: addMouse.containsMouse ? "white" : "#9a9a9a"
+                    color: addMouse.containsMouse ? Theme.textPrimary : Theme.textMuted
                     anchors.verticalCenter: parent.verticalCenter
                     rotation: addMouse.containsMouse ? 90 : 0
                     Behavior on rotation { NumberAnimation { duration: 200 } }
@@ -111,7 +104,7 @@ Item {
                 Text {
                     text: "New"
                     font.pixelSize: 13
-                    color: addMouse.containsMouse ? "white" : "#9a9a9a"
+                    color: addMouse.containsMouse ? Theme.textPrimary : Theme.textMuted
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -121,36 +114,30 @@ Item {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    stations.append({ name: "Station " + (stations.count + 1) })
-                    root.currentIndex = stations.count - 1
-                    root.stationAdded(root.currentIndex)
-                }
+                onClicked: root.addStationRequested()
             }
         }
 
-        Item{
+        Item {
             Layout.fillWidth: true
         }
 
-        //Notifications
         MenuButton {
             iconName: "warning"
-            iconColor: "#d05016"
+            iconColor: Theme.warningColor
             onClicked: console.log("clicked search")
         }
-        Text{
+        Text {
             text: "Threat Detected"
-            color: "#d05016"
+            color: Theme.warningColor
         }
     }
 
-    // thin separator under the whole bar
     Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         height: 1
-        color: "#333333"
+        color: Theme.borderColor
     }
 }

@@ -9,13 +9,13 @@
 #include <QList>
 #include <QGeoCoordinate>
 #include <QtQml/qqmlregistration.h>
-#include "telemetryclient.h"
+#include "stationstate.h"
 
 class HeatmapItem : public QQuickPaintedItem
 {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(TelemetryClient *locator READ locator WRITE setLocator NOTIFY locatorChanged)
+    Q_PROPERTY(StationState *locator READ locator WRITE setLocator NOTIFY locatorChanged)
     Q_PROPERTY(QRectF viewRect READ viewRect WRITE setViewRect NOTIFY viewRectChanged)
     Q_PROPERTY(float intensity READ intensity WRITE setIntensity NOTIFY intensityChanged)
     Q_PROPERTY(double gridExtent READ gridExtent WRITE setGridExtent NOTIFY gridChanged)
@@ -23,20 +23,20 @@ class HeatmapItem : public QQuickPaintedItem
     Q_PROPERTY(QGeoCoordinate gridBottomRight READ gridBottomRight NOTIFY gridChanged)
 
 public:
-    static constexpr int kGrid = 384;      // was 128 (cells ~7 m instead of ~22 m)
-    static constexpr int kBins = 720;      // 0.5 deg bins, interpolated when drawing
+    static constexpr int kGrid = 256;
+    static constexpr int kBins = 720;
 
     explicit HeatmapItem(QQuickItem *parent = nullptr);
     void paint(QPainter *painter) override;
 
-    TelemetryClient *locator() const { return m_locator; }
+    StationState *locator() const { return m_locator; }
     QRectF viewRect() const { return m_viewRect; }
     float intensity() const { return m_intensity; }
     double gridExtent() const { return m_extent; }
     QGeoCoordinate gridTopLeft() const;
     QGeoCoordinate gridBottomRight() const;
 
-    void setLocator(TelemetryClient *l);
+    void setLocator(StationState *l);
     void setViewRect(const QRectF &r);
     void setIntensity(float v);
     void setGridExtent(double meters);
@@ -58,7 +58,7 @@ private:
     void rebuildLut();
     double metersPerDegLon() const;
 
-    QPointer<TelemetryClient> m_locator;
+    QPointer<StationState> m_locator;
     QList<QMetaObject::Connection> m_conns;
 
     QGeoCoordinate m_station;
@@ -68,12 +68,12 @@ private:
     int m_outliers = 0;
 
     QVector<float> m_hist;
-    QVector<float> m_cellPos;       // fractional bin position per cell, <0 = outside circle
-    QVector<QRgb> m_lut;            // 256-entry color table for current intensity
-    QVector<float> m_cellDist;      // 0 at station .. 1 at grid edge
+    QVector<float> m_cellPos;
+    QVector<QRgb> m_lut;
+    QVector<float> m_cellDist;
     QVector<quint8> m_values;
-    QImage m_image;                 // ARGB32_Premultiplied
+    QImage m_image;
 
     QRectF m_viewRect;
-    float m_intensity = 1.0f;       // was 0.75: peak now reaches pure red
+    float m_intensity = 1.0f;
 };

@@ -1,4 +1,4 @@
-//Main.qml
+// Main.qml
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
@@ -13,15 +13,12 @@ ApplicationWindow {
     minimumHeight: 250
     visible: true
     title: qsTr("fc")
-    property bool lightMode: Application.styleHints.colorScheme === Qt.Light
-    property color superDark: "#101010"
-    property color reallyDark: "#1f1f1f"
-    property color dark: "#262626"
 
-    color: superDark
+    color: Theme.backgroundColor
 
-    TelemetryClient {
-        id: telemetry
+    StationModel {
+        id: stationModel
+        basePort: 9000
     }
 
     FontLoader {
@@ -29,11 +26,15 @@ ApplicationWindow {
         source: "qrc:/qt/qml/faraz/resources/icons/MaterialSymbolsSharp.ttf"
     }
 
+    SettingsPopup { id: settingsPopup }
+
     RowLayout {
         anchors.fill: parent
         spacing: 5
 
-        LeftMenu{}
+        LeftMenu {
+            onSettingsRequested: settingsPopup.open()
+        }
 
         Item {
             Layout.fillWidth: true
@@ -43,19 +44,25 @@ ApplicationWindow {
                 anchors.fill: parent
                 spacing: 5
 
-                TopMenu {}
+                TopMenu {
+                    model: stationModel
+                    currentIndex: stationModel.currentIndex
+                    onStationSelected: (index) => stationModel.currentIndex = index
+                    onAddStationRequested: stationModel.addStation()
+                }
 
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 400
 
-                    MapContainer{}
+                    MapContainer {
+                        stationState: stationModel.currentStation
+                    }
 
-                    // waterfall
                     Waterfall {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        source: telemetry
+                        source: stationModel.currentStation
                         minDb: -130
                         maxDb: -60
                     }
@@ -68,16 +75,16 @@ ApplicationWindow {
                     ResourceParameters {
                         Layout.preferredWidth: 800
                         Layout.fillHeight: true
-                        color: reallyDark
                         radius: 10
-                        telemetry: telemetry
+                        stationState: stationModel.currentStation
+                        onTuningRequested: (centerHz, spanHz, dfMode) =>
+                            stationModel.tuneCurrentStation(centerHz, spanHz, dfMode)
                     }
 
-                    // Spectrum Wave
                     SpectrumWave {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        source: telemetry
+                        source: stationModel.currentStation
                     }
                 }
             }

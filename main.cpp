@@ -5,6 +5,9 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
+    QCoreApplication::setOrganizationName("faraz");
+    QCoreApplication::setApplicationName("fc");
+
     QQmlApplicationEngine engine;
     QObject::connect(
         &engine,

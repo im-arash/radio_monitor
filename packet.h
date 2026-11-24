@@ -4,7 +4,7 @@
 
 namespace faraz {
 
-inline constexpr quint32 kPacketMagic = 0x46525A31u; // "FRZ1"
+inline constexpr quint32 kPacketMagic = 0x46525A31u;
 inline constexpr quint16 kPacketVersion = 1;
 inline constexpr int kMaxPacketBins = 2048;
 
