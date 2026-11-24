@@ -20,21 +20,8 @@ ApplicationWindow {
 
     color: superDark
 
-    SpectrumTelemetry {
+    TelemetryClient {
         id: telemetry
-        demo: true
-    }
-
-    DfTelemetry {
-        id: df
-        active: telemetry.dfMode
-        station: QtPositioning.coordinate(35.700956, 51.340737)
-    }
-
-    Connections {
-        target: telemetry
-        function onBearingMeasured(bearing, level) { df.pushBearing(bearing) }
-        function onAxisChanged() { df.reset() }
     }
 
     FontLoader {
@@ -70,7 +57,7 @@ ApplicationWindow {
                         Layout.fillHeight: true
                         source: telemetry
                         minDb: -130
-                        maxDb: -50
+                        maxDb: -60
                     }
                 }
 

@@ -35,18 +35,21 @@ qt_add_qml_module(appfaraz
     SOURCES
         spectrumwaveitem.h
         spectrumwaveitem.cpp
-        spectrumtelemetry.h
-        spectrumtelemetry.cpp
+
+
         waterfallitem.h
         waterfallitem.cpp
         heatmapitem.h
         heatmapitem.cpp
-        dftelemetry.h
-        dftelemetry.cpp
+
+
     RESOURCES
         resources/images/farazlogo.png
         resources/icons/MaterialSymbolsSharp.ttf
         resources/icons/MaterialSymbolsSharp.codepoints
+        SOURCES telemetryclient.h telemetryclient.cpp
+        SOURCES
+        SOURCES packet.h
 )
 
 

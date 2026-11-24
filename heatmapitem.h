@@ -1,45 +1,79 @@
+// heatmapitem.h
 #pragma once
-#include <QQuickRhiItem>
-#include <QByteArray>
+#include <QQuickPaintedItem>
+#include <QPainter>
+#include <QImage>
 #include <QPointer>
 #include <QRectF>
+#include <QVector>
+#include <QList>
+#include <QGeoCoordinate>
 #include <QtQml/qqmlregistration.h>
-#include "dftelemetry.h"
+#include "telemetryclient.h"
 
-class HeatmapItem : public QQuickRhiItem
+class HeatmapItem : public QQuickPaintedItem
 {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(DfTelemetry *locator READ locator WRITE setLocator NOTIFY locatorChanged)
-    Q_PROPERTY(QRectF viewRect READ viewRect WRITE setViewRect NOTIFY viewRectChanged)   // grid bounds in item pixels
+    Q_PROPERTY(TelemetryClient *locator READ locator WRITE setLocator NOTIFY locatorChanged)
+    Q_PROPERTY(QRectF viewRect READ viewRect WRITE setViewRect NOTIFY viewRectChanged)
     Q_PROPERTY(float intensity READ intensity WRITE setIntensity NOTIFY intensityChanged)
+    Q_PROPERTY(double gridExtent READ gridExtent WRITE setGridExtent NOTIFY gridChanged)
+    Q_PROPERTY(QGeoCoordinate gridTopLeft READ gridTopLeft NOTIFY gridChanged)
+    Q_PROPERTY(QGeoCoordinate gridBottomRight READ gridBottomRight NOTIFY gridChanged)
 
 public:
-    explicit HeatmapItem(QQuickItem *parent = nullptr);
-    QQuickRhiItemRenderer *createRenderer() override;
+    static constexpr int kGrid = 384;      // was 128 (cells ~7 m instead of ~22 m)
+    static constexpr int kBins = 720;      // 0.5 deg bins, interpolated when drawing
 
-    DfTelemetry *locator() const { return m_locator; }
+    explicit HeatmapItem(QQuickItem *parent = nullptr);
+    void paint(QPainter *painter) override;
+
+    TelemetryClient *locator() const { return m_locator; }
     QRectF viewRect() const { return m_viewRect; }
     float intensity() const { return m_intensity; }
+    double gridExtent() const { return m_extent; }
+    QGeoCoordinate gridTopLeft() const;
+    QGeoCoordinate gridBottomRight() const;
 
-    void setLocator(DfTelemetry *l);
+    void setLocator(TelemetryClient *l);
     void setViewRect(const QRectF &r);
     void setIntensity(float v);
+    void setGridExtent(double meters);
+
+    Q_INVOKABLE void reset();
 
 signals:
     void locatorChanged();
     void viewRectChanged();
     void intensityChanged();
+    void gridChanged();
 
 private:
-    friend class HeatmapRenderer;
-    void onGrid(const QByteArray &grid);
+    void onBearingMeasured(double bearingDeg, double levelDb);
+    void pushBearing(double rawDeg);
+    void rebuildCellMap();
+    void publishGrid();
+    void rebuildImage();
+    void rebuildLut();
+    double metersPerDegLon() const;
 
-    QPointer<DfTelemetry> m_locator;
-    QMetaObject::Connection m_conn;
+    QPointer<TelemetryClient> m_locator;
+    QList<QMetaObject::Connection> m_conns;
 
-    QByteArray m_grid;
-    bool m_dirty = false;
+    QGeoCoordinate m_station;
+    double m_extent = 1400.0;
+    bool m_hasBearing = false;
+    double m_bearing = 0.0;
+    int m_outliers = 0;
+
+    QVector<float> m_hist;
+    QVector<float> m_cellPos;       // fractional bin position per cell, <0 = outside circle
+    QVector<QRgb> m_lut;            // 256-entry color table for current intensity
+    QVector<float> m_cellDist;      // 0 at station .. 1 at grid edge
+    QVector<quint8> m_values;
+    QImage m_image;                 // ARGB32_Premultiplied
+
     QRectF m_viewRect;
-    float m_intensity = 0.75f;
+    float m_intensity = 1.0f;       // was 0.75: peak now reaches pure red
 };

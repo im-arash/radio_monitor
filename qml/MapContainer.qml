@@ -6,6 +6,7 @@ import QtPositioning
 Item {
     id: mapContainer
     property int cornerRadius: 10
+    property var df: telemetry
 
     Layout.preferredWidth: 800
     Layout.preferredHeight: 400
@@ -21,60 +22,55 @@ Item {
     }
 
     Map {
-        id: gisMap
-        anchors.fill: parent
-        plugin: mapPlugin
-        activeMapType: supportedMapTypes[supportedMapTypes.length - 1]
-        center: QtPositioning.coordinate(35.700956, 51.340737)
-        zoomLevel: 16
+            id: gisMap
+            anchors.fill: parent
+            plugin: mapPlugin
+            activeMapType: supportedMapTypes[supportedMapTypes.length - 1]
+            center: df.station.isValid ? df.station : QtPositioning.coordinate(0, 0)
+            zoomLevel: 16
 
-        onCenterChanged: {
-            console.log("Map center:", center.latitude, center.longitude)
-        }
+            MapCircle {
+                visible: df.station.isValid
+                center: df.station
+                radius: 45
+                color: "transparent"
+                border.color: "#00b0ff"
+                border.width: 2
+            }
 
-        // ring around the station
-        MapCircle {
-            center: df.station
-            radius: 45
-            color: "transparent"
-            border.color: "#00b0ff"
-            border.width: 2
-        }
+            MapPolyline {
+                visible: df.active && df.hasBearing && df.station.isValid && df.lineEnd.isValid
+                line.width: 2
+                line.color: "#00b0ff"
+                path: [df.station, df.lineEnd]
+            }
 
-        // the one bearing line
-        MapPolyline {
-            visible: df.active && df.hasBearing
-            line.width: 2
-            line.color: "#00b0ff"
-            path: [df.station, df.lineEnd]
-        }
-
-        // station marker
-        MapQuickItem {
-            coordinate: df.station
-            anchorPoint.x: 7
-            anchorPoint.y: 7
-            sourceItem: Item {
-                width: 14
-                height: 14
-                Rectangle {
-                    anchors.fill: parent
-                    rotation: 45
-                    color: "#00b0ff"
-                    border.color: "white"
-                    border.width: 2
-                }
-                Text {
-                    x: 18
-                    y: -2
-                    text: "DF 1"
-                    color: "white"
-                    font.pixelSize: 11
-                    style: Text.Outline
-                    styleColor: "black"
+            MapQuickItem {
+                visible: df.station.isValid
+                coordinate: df.station
+                anchorPoint.x: 7
+                anchorPoint.y: 7
+                sourceItem: Item {
+                    width: 14
+                    height: 14
+                    Rectangle {
+                        anchors.fill: parent
+                        rotation: 45
+                        color: "#00b0ff"
+                        border.color: "white"
+                        border.width: 2
+                    }
+                    Text {
+                        x: 18
+                        y: -2
+                        text: "DF 1"
+                        color: "white"
+                        font.pixelSize: 11
+                        style: Text.Outline
+                        styleColor: "black"
+                    }
                 }
             }
-        }
 
         DragHandler {
             id: panHandler

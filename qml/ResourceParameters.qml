@@ -17,7 +17,7 @@ Rectangle {
     readonly property var spans: [50e3, 100e3, 200e3, 500e3, 1e6, 5e6, 10e6]
     readonly property var spanLabels: ["50 kHz", "100 kHz", "200 kHz", "500 kHz", "1 MHz", "5 MHz", "10 MHz"]
 
-    property SpectrumTelemetry telemetry: null
+    property var telemetry: null
 
     color: "#202020"
     radius: 8
