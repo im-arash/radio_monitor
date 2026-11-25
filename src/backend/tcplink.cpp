@@ -1,5 +1,5 @@
-// tcpclient.cpp
-#include "tcpclient.h"
+// tcplink.cpp
+#include "tcplink.h"
 
 #include <cstddef>
 #include <cstring>
@@ -11,33 +11,33 @@ namespace {
 constexpr quint32 kMaxTcpFrameBytes = 1024 * 1024;
 } // namespace
 
-TcpClient::TcpClient(QObject *parent)
+TcpLink::TcpLink(QObject *parent)
     : QObject(parent)
 {
     connect(&m_server, &QTcpServer::newConnection,
-            this, &TcpClient::onNewConnection);
+            this, &TcpLink::onNewConnection);
 }
 
-TcpClient::~TcpClient()
+TcpLink::~TcpLink()
 {
     close();
 }
 
-bool TcpClient::listen(quint16 port)
+bool TcpLink::listen(quint16 port)
 {
     close();
     m_port = port;
 
     if (m_server.listen(QHostAddress::AnyIPv4, m_port)) {
-        qInfo() << "TcpClient listening on port" << m_port;
+        qInfo() << "TcpLink listening on port" << m_port;
         return true;
     }
 
-    qWarning() << "TcpClient failed to listen on port" << m_port << m_server.errorString();
+    qWarning() << "TcpLink failed to listen on port" << m_port << m_server.errorString();
     return false;
 }
 
-void TcpClient::close()
+void TcpLink::close()
 {
     if (m_client) {
         m_client->disconnect(this);
@@ -50,12 +50,12 @@ void TcpClient::close()
     m_server.close();
 }
 
-bool TcpClient::hasClient() const
+bool TcpLink::hasClient() const
 {
     return m_client && m_client->state() == QAbstractSocket::ConnectedState;
 }
 
-void TcpClient::onNewConnection()
+void TcpLink::onNewConnection()
 {
     QTcpSocket *next = m_server.nextPendingConnection();
     if (!next)
@@ -74,11 +74,11 @@ void TcpClient::onNewConnection()
     m_client->setSocketOption(QAbstractSocket::LowDelayOption, 1);
 
     connect(m_client, &QTcpSocket::readyRead,
-            this, &TcpClient::onReadyRead);
+            this, &TcpLink::onReadyRead);
     connect(m_client, &QTcpSocket::disconnected,
-            this, &TcpClient::onDisconnected);
+            this, &TcpLink::onDisconnected);
 
-    qInfo() << "TcpClient accepted connection from"
+    qInfo() << "TcpLink accepted connection from"
             << m_client->peerAddress().toString() << m_client->peerPort();
 
     if (!hadClient) {
@@ -86,7 +86,7 @@ void TcpClient::onNewConnection()
     }
 }
 
-void TcpClient::onDisconnected()
+void TcpLink::onDisconnected()
 {
     if (!m_client)
         return;
@@ -97,7 +97,7 @@ void TcpClient::onDisconnected()
     emit clientDisconnected();
 }
 
-void TcpClient::onReadyRead()
+void TcpLink::onReadyRead()
 {
     if (!m_client)
         return;
@@ -106,7 +106,7 @@ void TcpClient::onReadyRead()
     processBuffer();
 }
 
-void TcpClient::processBuffer()
+void TcpLink::processBuffer()
 {
     constexpr int headerBytes = static_cast<int>(sizeof(quint32));
     constexpr quint32 headerOnlyBytes = static_cast<quint32>(offsetof(faraz::Packet, bins));
@@ -152,10 +152,10 @@ void TcpClient::processBuffer()
     }
 }
 
-bool TcpClient::sendTuning(double centerFrequencyHz, double spanHz, bool dfMode)
+bool TcpLink::sendTuning(double centerFrequencyHz, double spanHz, bool dfMode)
 {
     if (!hasClient()) {
-        qWarning() << "TcpClient::sendTuning: no connected client on port" << m_port;
+        qWarning() << "TcpLink::sendTuning: no connected client on port" << m_port;
         return false;
     }
 

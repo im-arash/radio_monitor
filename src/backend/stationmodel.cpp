@@ -101,8 +101,8 @@ void StationModel::addStation(const QString &name)
     state->setName(resolvedName);
     state->setTcpPort(port);
 
-    auto *stream = new TcpClient(this);
-    connect(stream, &TcpClient::packetReceived,
+    auto *stream = new TcpLink(this);
+    connect(stream, &TcpLink::packetReceived,
             state, &StationState::applyPacket);
     stream->listen(port);
 

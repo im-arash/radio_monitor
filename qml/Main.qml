@@ -12,7 +12,7 @@ ApplicationWindow {
     minimumWidth: 200
     minimumHeight: 250
     visible: true
-    title: qsTr("fc")
+    title: qsTr("farazcomm")
 
     color: Theme.backgroundColor
 

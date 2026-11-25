@@ -44,8 +44,8 @@ qt_add_qml_module(appfaraz
     SOURCES
         # --- backend ---
         src/backend/packet.h
-        src/backend/tcpclient.h
-        src/backend/tcpclient.cpp
+        src/backend/tcplink.h
+        src/backend/tcplink.cpp
         src/backend/stationstate.h
         src/backend/stationstate.cpp
         src/backend/stationmodel.h

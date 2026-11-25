@@ -1,4 +1,4 @@
-// tcpclient.h
+// tcplink.h
 #pragma once
 
 #include "packet.h"
@@ -10,14 +10,14 @@
 #include <QHostAddress>
 #include <QtQml/qqmlregistration.h>
 
-class TcpClient : public QObject
+class TcpLink : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
 
 public:
-    explicit TcpClient(QObject *parent = nullptr);
-    ~TcpClient() override;
+    explicit TcpLink(QObject *parent = nullptr);
+    ~TcpLink() override;
 
     Q_INVOKABLE bool listen(quint16 port);
     Q_INVOKABLE void close();
