@@ -107,7 +107,7 @@ The control direction is not binary, it's low-rate so plain JSON is fine:
 
 Each message ends with `\n`.
 
-> `packet.h` is duplicated in both projects (not an actual shared file), so if you change it, change it in both places and bump `kPacketVersion`.
+> `packet.h` is duplicated in both projects (not an actual shared file).
 
 ## Architectural Decisions
  
