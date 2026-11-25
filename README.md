@@ -106,13 +106,25 @@ Each message ends with `\n`.
 > `packet.h` is duplicated in both projects (not an actual shared file), so if you change it, change it in both places and bump `kPacketVersion`.
 
 ## Architectural Decisions
-
+ 
 - **MVVM / Model-view ✅** related to StationState & StationModel.
 - **Singleton ✅** Theme is a global state and it shouldn't be initiated more than once (it's a QML singleton).
-- **Adapter ⚠️** right now app only has TCP as networking protocol, later on by adding more protocols we should adopt this architecture.
-- **Factory ⚠️** for now new stations are managed by StationState & StationModel because most requirements are not revealed yet, later on if each station has different behavior Factory pattern could be the right candidate to implement.
-
-*As for Core Design Principles, I tried to apply SOLID as much as possible for this scale without overengineering. Single responsibility and open closed principles had my most attention.*
+- **Adapter ✅ (minimal)** `StationModel` talks to `ILink`, not to TCP directly. `TcpLink` is the only implementation today. Adding UDP / serial / file replay means writing another `ILink` and changing one line in `StationModel::createLink()`. I kept it to one small interface and didn't build a plugin system, because there is only one protocol right now.
+- **Factory ⚠️** for now new stations are managed by StationState & StationModel because most requirements are not revealed yet, later on if each station has different behavior Factory pattern could be the right candidate to implement (`createLink()` is already the single place where it would go).
+### SOLID
+ 
+I tried to apply SOLID as much as possible for this scale without overengineering.
+ 
+- **Single responsibility:** each class has one reason to change.
+  - `TcpLink`: sockets and framing, doesn't know what a station is.
+  - `StationState`: one station's data, applies packets.
+  - `StationModel`: the list of stations and wiring.
+  - Each painted item (SpectrumWaveItem, WaterfallItem, HeatmapItem) draws one thing.
+- **Open/closed:** 
+  - New visualizers plug into `StationState` signals (`frameReady`, `bearingMeasured`), so the existing items and `StationState` itself don't change. You only add the new item and its QML wiring.
+  - A new protocol is a new `ILink` implementation, plus one line in `StationModel::createLink()`.
+- **Dependency inversion:** `StationModel` depends on `ILink`, not on `TcpLink`. Visualizers depend on `StationState` signals, `StationState` doesn't know visualizers exist.
+- **Liskov / Interface segregation:** not much to apply at this size. `ILink` has one implementation and three methods, so there's nothing to violate yet. I didn't force extra interfaces just to tick the box.
 
 ---
 
@@ -126,7 +138,7 @@ Each message ends with `\n`.
 
   *the "Threat Detected" label in the top bar is only a placeholder for now, it's always visible and not connected to anything.*
 
-- **Shared packet header:** move `packet.h` into one shared place (git submodule or a small common library) and add a `static_assert` on the struct size, so both apps can't drift apart.
+- **More links:** a second `ILink` implementation (UDP, serial or recorded file replay).
 
 ## Features
 
