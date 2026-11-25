@@ -12,7 +12,7 @@ constexpr quint32 kMaxTcpFrameBytes = 1024 * 1024;
 } // namespace
 
 TcpLink::TcpLink(QObject *parent)
-    : QObject(parent)
+    : ILink(parent)
 {
     connect(&m_server, &QTcpServer::newConnection,
             this, &TcpLink::onNewConnection);

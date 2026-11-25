@@ -2,6 +2,7 @@
 #pragma once
 
 #include "packet.h"
+#include "ilink.h"
 
 #include <QObject>
 #include <QTcpServer>
@@ -10,7 +11,7 @@
 #include <QHostAddress>
 #include <QtQml/qqmlregistration.h>
 
-class TcpLink : public QObject
+class TcpLink : public ILink
 {
     Q_OBJECT
     QML_ELEMENT
@@ -19,18 +20,16 @@ public:
     explicit TcpLink(QObject *parent = nullptr);
     ~TcpLink() override;
 
-    Q_INVOKABLE bool listen(quint16 port);
-    Q_INVOKABLE void close();
     quint16 port() const { return m_port; }
     bool isListening() const { return m_server.isListening(); }
     bool hasClient() const;
 
-    Q_INVOKABLE bool sendTuning(double centerFrequencyHz, double spanHz, bool dfMode);
+    Q_INVOKABLE bool listen(quint16 port) override;
+    Q_INVOKABLE void close() override;
+    Q_INVOKABLE bool sendTuning(double centerFrequencyHz, double spanHz, bool dfMode) override;
 
 signals:
-    void packetReceived(const faraz::Packet &packet);
-    void clientConnected();
-    void clientDisconnected();
+
 
 private slots:
     void onNewConnection();

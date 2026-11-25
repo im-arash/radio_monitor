@@ -2,7 +2,7 @@
 #pragma once
 
 #include "stationstate.h"
-#include "tcplink.h"
+#include "ilink.h"
 
 #include <QAbstractListModel>
 #include <QList>
@@ -52,7 +52,7 @@ signals:
 private:
     struct Entry {
         StationState *state = nullptr;
-        TcpLink *stream = nullptr;
+        ILink *stream = nullptr;
     };
 
     void createInitialStations(int count);
@@ -60,4 +60,5 @@ private:
     QList<Entry> m_entries;
     int m_currentIndex = -1;
     int m_basePort = 9000;
+    ILink *createLink();
 };

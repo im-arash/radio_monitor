@@ -57,6 +57,7 @@ qt_add_qml_module(appfaraz
         src/items/spectrumwaveitem.cpp
         src/items/waterfallitem.h
         src/items/waterfallitem.cpp
+        src/backend/ilink.h
 
     RESOURCES
         resources/images/farazlogo.png

@@ -1,5 +1,11 @@
 // stationmodel.cpp
 #include "stationmodel.h"
+#include "tcplink.h"
+
+ILink *StationModel::createLink()
+{
+    return new TcpLink(this);
+}
 
 StationModel::StationModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -101,8 +107,8 @@ void StationModel::addStation(const QString &name)
     state->setName(resolvedName);
     state->setTcpPort(port);
 
-    auto *stream = new TcpLink(this);
-    connect(stream, &TcpLink::packetReceived,
+    auto *stream = createLink();
+    connect(stream, &ILink::packetReceived,
             state, &StationState::applyPacket);
     stream->listen(port);
 
