@@ -1,7 +1,11 @@
 <h1>🛜 Radio Monitor</h1>
 <img width="1276" height="753" alt="image" src="https://github.com/user-attachments/assets/df9724a7-d691-4b1a-953f-5baad889991e" />
 
+## Demo: Multiple Stations
 https://github.com/user-attachments/assets/08f4b7ea-1cda-4765-9ccf-f8751c5c220a
+
+## Demo: Tuning
+https://github.com/user-attachments/assets/3713d2b6-4823-44a0-9468-f7cb4ce81b17
 
 
 
