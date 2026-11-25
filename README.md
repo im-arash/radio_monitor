@@ -61,7 +61,7 @@ For testing purposes, system is decoupled into two separate applications:
 
    *Items are based on QPainter & QQuickPaintedItem for CPU processing support, so the app can run on lower-end devices.*
 
-<img width="5122" height="722" alt="mermaid-diagram (10)" src="https://github.com/user-attachments/assets/551aa6aa-6aac-4cc0-bdd8-0650d597287c" />
+<!-- <img width="5122" height="722" alt="mermaid-diagram (10)" src="https://github.com/user-attachments/assets/551aa6aa-6aac-4cc0-bdd8-0650d597287c" /> -->
 
 ## Protocol
 
@@ -110,10 +110,13 @@ Each message ends with `\n`.
 > `packet.h` is duplicated in both projects (not an actual shared file).
 
 ## Architectural Decisions
+How the pieces fit together (minimal, not every class):
+<img width="2462" height="2148" alt="class-diagram" src="https://github.com/user-attachments/assets/92f2a83d-91a1-45e8-849b-68a3b4bdd566" />
+
  
 - **MVVM / Model-view ✅** related to StationState & StationModel.
 - **Singleton ✅** Theme is a global state and it shouldn't be initiated more than once (it's a QML singleton).
-- **Adapter ✅ (minimal)** `StationModel` talks to `ILink`, not to TCP directly. `TcpLink` is the only implementation today. Adding UDP / serial / file replay means writing another `ILink` and changing one line in `StationModel::createLink()`. I kept it to one small interface and didn't build a plugin system, because there is only one protocol right now.
+- **Interface (ILink) ✅** `StationModel` talks to `ILink`, rather than talking to specific protocol.
 - **Factory ⚠️** for now new stations are managed by StationState & StationModel because most requirements are not revealed yet, later on if each station has different behavior Factory pattern could be the right candidate to implement (`createLink()` is already the single place where it would go).
 ### SOLID
  
