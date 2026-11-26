@@ -151,4 +151,7 @@ I tried to apply SOLID as much as possible for this scale without overengineerin
 
 Theme Color Selection with presets
 
-<img width="1278" height="753" alt="image" src="https://github.com/user-attachments/assets/ce88dd59-3ee6-4c32-819e-bbb56770e40c" />
+<img width="1273" height="755" alt="image" src="https://github.com/user-attachments/assets/74f14768-9fe6-4234-a494-75ddff224848" />
+<img width="1272" height="754" alt="image" src="https://github.com/user-attachments/assets/523a4c22-8e20-496f-bc29-d80b637e979f" />
+
+
