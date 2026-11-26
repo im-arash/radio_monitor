@@ -69,6 +69,8 @@ For testing purposes, system is decoupled into two separate applications:
 
 Every frame looks like this:
 
+<img width="756" height="112" alt="image" src="https://github.com/user-attachments/assets/05e95522-a296-4c95-9f38-b79c73a26fe8" />
+
 ```
 [ 4 bytes: payload size, big-endian ][ payload: Packet header + binCount * float ]
 ```
