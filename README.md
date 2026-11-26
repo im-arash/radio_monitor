@@ -137,7 +137,6 @@ I tried to apply SOLID as much as possible for this scale without overengineerin
 
 ## Future Implementations/Improvements
 
-- **GPU Renderer:** for cross platform purposes, app should have a GPU renderer next to the current version which has QPainter, a CPU based renderer.
 - **Recorder / Database:** adding history based on timestamps.
 - **Threat Notifier:** we should be able to define our own pattern, and when that pattern is visible to the app, it counts it as a threat and notifies us.
 
