@@ -40,6 +40,7 @@ qt_add_qml_module(appfaraz
         qml/panels/ResourceParameters.qml
         qml/panels/SpectrumWave.qml
         qml/panels/Waterfall.qml
+        qml/panels/MapOverlay.qml
 
     SOURCES
         # --- backend ---

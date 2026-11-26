@@ -12,6 +12,11 @@ QtObject {
     property color backgroundColor: "#101010"
     property color accentColor:     "#00b0ff"
     property color iconColor:       "#808080"
+    property string mapStyle: "light"     // "light" | "dark" | "theme"
+
+    // which tile set the map uses: the night type or the light OSM type
+    readonly property bool mapNightTiles: mapStyle === "dark"
+                                          || (mapStyle === "theme" && isDark)
 
     // ------------------------------------------------------------------
     // 2) DERIVED from the three above (never edited directly)
@@ -59,7 +64,7 @@ QtObject {
         iconColor       = p.icon
     }
 
-    function resetAll() { applyPreset(presets[0]) }
+    function resetAll() { applyPreset(presets[0]); mapStyle = "light" }
 
     // ------------------------------------------------------------------
     // 4) Persistence (needs organizationName/applicationName in main.cpp)
@@ -69,5 +74,6 @@ QtObject {
         property alias background: root.backgroundColor
         property alias accent:     root.accentColor
         property alias icon:       root.iconColor
+        property alias map: root.mapStyle
     }
 }

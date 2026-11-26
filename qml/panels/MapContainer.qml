@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import QtLocation
 import QtPositioning
 import faraz
@@ -27,58 +28,44 @@ Item {
         id: gisMap
         anchors.fill: parent
         plugin: mapPlugin
-        activeMapType: supportedMapTypes.length > 0
-                       ? supportedMapTypes[supportedMapTypes.length - 1]
-                       : undefined
+        copyrightsVisible: false
+
+        // false = your custom OSM tiles (always the last type)
+        // true  = the plugin's built-in night map type, if it exists
+        function pickMapType(night) {
+            const types = supportedMapTypes
+            if (!types || types.length === 0)
+                return undefined
+            if (night) {
+                for (let i = 0; i < types.length; ++i) {
+                    if (types[i].night)
+                        return types[i]
+                }
+            }
+            return types[types.length - 1]
+        }
+        activeMapType: pickMapType(Theme.mapNightTiles)
+
+        // "light" and "dark" show the provider's tiles as they are.
+        // "theme" makes the tiles black & white first, then the tint below adds the background color.
+        // Only the tiles are affected: the DF marker, circle and bearing line are drawn by
+        // MapOverlay above the map, and the heatmap is a sibling item.
+        layer.enabled: Theme.mapStyle === "theme"
+        layer.effect: MultiEffect {
+            saturation: -1.0      // optional: brightness / contrast (-1..1)
+        }
+
         center: (df && df.station && df.station.isValid)
                 ? df.station
                 : QtPositioning.coordinate(0, 0)
         zoomLevel: 16
 
-        MapCircle {
-            visible: !!(df && df.station && df.station.isValid)
-            center: (df && df.station) ? df.station : QtPositioning.coordinate(0, 0)
-            radius: 45
-            color: "transparent"
-            border.color: Theme.accentColor
-            border.width: 2
-        }
-
-        MapPolyline {
-            visible: !!(df && df.active && df.hasBearing
-                        && df.station && df.station.isValid
-                        && df.lineEnd && df.lineEnd.isValid)
-            line.width: 2
-            line.color: Theme.accentColor
-            path: (df && df.station && df.lineEnd) ? [df.station, df.lineEnd] : []
-        }
-
-        MapQuickItem {
-            visible: !!(df && df.station && df.station.isValid)
-            coordinate: (df && df.station) ? df.station : QtPositioning.coordinate(0, 0)
-            anchorPoint.x: 7
-            anchorPoint.y: 7
-            sourceItem: Item {
-                width: 14
-                height: 14
-                Rectangle {
-                    anchors.fill: parent
-                    rotation: 45
-                    color: Theme.accentColor
-                    border.color: "white"
-                    border.width: 2
+        WheelHandler {
+                    id: wheelZoom
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    rotationScale: 1 / 120
+                    property: "zoomLevel"
                 }
-                Text {
-                    x: 18
-                    y: -2
-                    text: "DF 1"
-                    color: "white"
-                    font.pixelSize: 11
-                    style: Text.Outline
-                    styleColor: "black"
-                }
-            }
-        }
 
         DragHandler {
             id: panHandler
@@ -107,6 +94,23 @@ Item {
                 gisMap.pan(-dx, -dy)
             }
         }
+    }
+
+    // "Match theme": tint the gray map with the app background color.
+    // Sits above the map and below the overlay, so marker/line/circle stay untouched.
+    Rectangle {
+        anchors.fill: parent
+        visible: Theme.mapStyle === "theme"
+        color: Theme.backgroundColor
+        opacity: 0.4              // tint strength: 0 = plain gray map, 1 = solid background color
+        enabled: false
+    }
+
+    MapOverlay {
+        anchors.fill: parent
+        map: gisMap
+        df: mapContainer.df
+        enabled: false
     }
 
     MapHeatmap {

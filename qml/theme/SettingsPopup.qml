@@ -271,6 +271,58 @@ Popup {
                     }
                 }
 
+                // map style
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    spacing: 8
+
+                    Label {
+                        text: "Map style"
+                        color: Theme.textPrimary
+                        font.pixelSize: 14
+                        font.bold: true
+                    }
+
+                    Row {
+                        spacing: 8
+                        Repeater {
+                            model: [
+                                { name: "Light",       value: "light" },
+                                { name: "Dark",        value: "dark"  },
+                                { name: "Match theme", value: "theme" }
+                            ]
+                            Rectangle {
+                                id: mapChip
+                                required property var modelData
+                                readonly property bool selected: Theme.mapStyle === modelData.value
+                                width: mapChipText.implicitWidth + 28
+                                height: 30
+                                radius: 15
+                                color: mapChipMouse.containsMouse ? Theme.hoverColor : Theme.inputColor
+                                border.width: selected ? 2 : 1
+                                border.color: selected ? Theme.accentColor : Theme.outlineColor
+
+                                Text {
+                                    id: mapChipText
+                                    anchors.centerIn: parent
+                                    text: mapChip.modelData.name
+                                    color: Theme.textPrimary
+                                    font.pixelSize: 13
+                                }
+                                MouseArea {
+                                    id: mapChipMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: Theme.mapStyle = mapChip.modelData.value
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // color editors
                 ColumnLayout {
                     Layout.fillWidth: true
